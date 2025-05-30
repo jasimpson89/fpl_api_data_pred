@@ -88,13 +88,15 @@ def get_player_match_data(player_id, player_team_id, team_mapping, fixture_looku
             "influence": match["influence"],
             "creativity": match["creativity"],
             "threat": match["threat"],
-            "ict_index": match["ict_index"],
-            "form": match.get("form")
+            "ict_index": match["ict_index"]
         })
 
     df = pd.DataFrame(matches)
     df.set_index("kickoff_time", inplace=True)
     df.sort_index(inplace=True)
+
+    # Compute 30-day rolling average of total points as form
+    df["form"] = df["points"].rolling("30D").mean().fillna(0)
     return df
 
 def main():
