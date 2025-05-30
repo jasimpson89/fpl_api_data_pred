@@ -19,7 +19,6 @@ def map_names_to_ids_and_form(player_names, elements):
     for player in elements:
         full_name = f"{player['first_name']} {player['second_name']}"
         if full_name in player_names:
-            # The 'form' is mapped per round below; this is just the current value.
             name_to_info[full_name] = {
                 "id": player["id"],
                 "team_id": player["team"],
@@ -46,7 +45,7 @@ def get_form_by_round(elements):
     form_by_player_id = {}
     for player in elements:
         player_id = player["id"]
-        history_past = player.get("ep_next")  # Just in case
+        history_past = player.get("ep_next")
         form_by_player_id[player_id] = player["form"]
     return form_by_player_id
 
@@ -97,6 +96,7 @@ def get_player_match_data(player_id, player_team_id, team_mapping, fixture_looku
 
     # Compute 30-day rolling average of total points as form
     df["form"] = df["points"].rolling("30D").mean().fillna(0)
+    df.team_name = team_mapping.get(player_team_id, f"Team {player_team_id}")
     return df
 
 def main():
@@ -116,7 +116,7 @@ def main():
     for name, info in name_to_info.items():
         df = get_player_match_data(info["id"], info["team_id"], team_mapping, fixture_lookup)
         player_dataframes[name] = df
-        print(f"\n{name}:\n{df[['gameweek', 'opponent_team', 'points', 'form']].head()}")
+        print(f"\n{name} ({df.team_name}):\n{df[['gameweek', 'opponent_team', 'points', 'form']].head()}")
 
     return player_dataframes
 
